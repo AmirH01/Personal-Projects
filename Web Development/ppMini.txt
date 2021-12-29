@@ -1,0 +1,314 @@
+//Amir Hadzic
+//short answer quiz procedural program where the player gets points based on the
+//number of members of the public (out of 100 people asked) who gave that answer
+
+import java.io.*;
+import java.util.Scanner; // Needed to make Scanner available
+import java.util.Random; // Needed to generate random numbers
+
+class QuestionTopics
+{
+    QuestionSet [] QuestionBank = new QuestionSet[3];
+}
+
+class QuestionSet // Creates record that holds 4 strings and 3 integers
+{
+    String question;
+
+    String choice1;
+    String choice2;
+    String choice3;
+
+    int points1;
+    int points2;
+    int points3;
+}
+
+public class PointlessQuiz5 {
+    public static void main(String[] args) throws IOException {
+        readFile();//Calls the method that will ask the user if they would like to see a prvious save of the game
+        beginQuiz(); // Calls the initial method that will run the code
+        System.exit(0);
+}
+    //reads the file line by line and prints it to the screen for the user to see
+    public static void readFile() throws IOException
+    {
+        String save = inputString("Do you have a save of this quiz? (YES/NO)").toUpperCase();
+        if (save.equals("YES")) {
+            if (inputString("Would you like to see the results of the previously saved quiz? (YES/NO)").toUpperCase().equals("YES")) {
+                BufferedReader inputStream = new BufferedReader(new FileReader("pointless.txt"));
+                String line = inputStream.readLine();
+                while (line != null) {
+                    System.out.println(line);
+                    line = inputStream.readLine();
+                }
+            }
+        }
+    }
+
+    //general method to prompt user to enter a string
+    public static String inputString(String message) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(message);
+        String answer = scanner.nextLine();
+
+        return answer;
+    }
+
+    //general method to prompt user to enter an integer
+    public static int inputInt(String message) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(message);
+        int answer = scanner.nextInt();
+        scanner.nextLine();
+
+        return answer;
+    }
+
+    //defines records and declares variables and also calls the necessary methods
+    public static void beginQuiz() throws IOException {
+        QuestionSet biscuits = new QuestionSet();
+        QuestionSet cars = new QuestionSet();
+        QuestionSet phones = new QuestionSet();
+
+        QuestionSet [] sets = new QuestionSet[3];
+        fillArray(sets, biscuits, cars, phones);
+        QuestionTopics bank = createBank(sets);
+
+        final int players = inputInt("How many players are there?");
+        boolean execute = true;
+
+        int [] playerPoints = new int [players];
+        int randomInt = randNum();
+        fillPoints(playerPoints, players);
+
+        while (execute)
+        {
+            checkSet(randomInt, bank, playerPoints, execute, players);
+
+            for (int i=1; i<players+1; i++)
+            {
+                System.out.println("Player " + i + "'s score is " + playerPoints[i-1]);
+            }
+            execute = false;
+        }
+
+        requestTable(players, playerPoints);
+    }
+
+    //fills the playerPoints array with integers
+    public static void fillPoints(int [] playerPoints, int players)
+    {
+        for (int i=0; i<players; i++)
+        {
+            playerPoints[i] = 0;
+        }
+    }
+    //asks the user if they would like a table that displays the points in order
+    public static void requestTable(int players, int [] playerPoints)  throws IOException{
+        int tempPoints;
+        int length = players;
+        int [] tempArray = new int [length];
+        PrintWriter outputStream = null;
+
+        for(int i = 0; i<length; i++){
+            tempArray[i] = playerPoints [i];
+        }
+
+        String answer = inputString("Would you like a table of the results in order and save this table of results? (YES/NO)").toUpperCase();
+        if (answer.equals("YES")){
+            for (int i = 0; i<length; i++){
+                for (int j = i+1; j<length; j++){
+                    if (tempArray[i]>tempArray[j]){
+                        tempPoints = tempArray[i];
+                        tempArray[i] = tempArray[j];
+                        tempArray[j] = tempPoints;
+                    }
+                }
+            }
+            outputStream = new PrintWriter(new FileWriter("pointless.txt"));
+            outputStream.println("from first place to last place:" + "\n");
+            System.out.println("\n" + "from first place to last place:" + "\n");
+            for(int i = 0; i<length; i++){
+                System.out.println("Player " + playerPosition(length, playerPoints, tempArray[i]) + " with " + tempArray[i] + " points");
+                outputStream.println("Player " + playerPosition(length, playerPoints, tempArray[i]) + " with " + tempArray[i] + " points");
+            }
+            outputStream.close();
+        }
+        else if (answer.equals("NO")){
+            System.exit(0);
+        }
+        else{
+            System.out.println("I did not understand that.");
+        }
+    }
+    //finds out what player had the corresponding points in order to list there names in order
+    public static int playerPosition(int length, int [] playerPoints, int target){
+        for(int i = 0; i<length; i++){
+            if (playerPoints[i] == target)
+            {
+                return i+1;
+            }
+        }
+        return -1;
+    }
+    //primitive operation that the abstract data type array uses to store the records about the topics of the questions
+    public static QuestionTopics createBank(QuestionSet [] sets)
+    {
+        QuestionTopics bnk = new QuestionTopics();
+        for (int i = 0; i<3; i++){
+            bnk.QuestionBank[i] = sets[i];
+        }
+        return bnk;
+    }
+    //primitive operation that will return the selected question topic from the abstract data type
+    public static QuestionSet selectedQuestionInBank(QuestionTopics bnk, int num)
+    {
+        return bnk.QuestionBank[num];
+    }
+
+    //gets points1 for the necessary input from the necessary QuestionSet
+    public static int getPoints1FromBank(QuestionTopics qSet, int num)
+    {
+        return (qSet.QuestionBank[num].points1);
+    }
+    //gets points2 for the necessary input from the necessary QuestionSet
+    public static int getPoints2FromBank(QuestionTopics qSet, int num)
+    {
+        return (qSet.QuestionBank[num].points2);
+    }
+    //gets points3 for the necessary input from the necessary QuestionSet
+    public static int getPoints3FromBank(QuestionTopics qSet, int num)
+    {
+        return (qSet.QuestionBank[num].points3);
+    }
+
+    // if question is about biscuits, this method will evaluate the users answers
+    public static int markingAnswer(String input, QuestionTopics bnk, int num)
+    {
+        if (input.equals(bnk.QuestionBank[num].choice1)) {
+            return getPoints1FromBank(bnk,num);
+        } else if (input.equals(bnk.QuestionBank[num].choice2)) {
+            return getPoints2FromBank(bnk,num);
+        } else if (input.equals(bnk.QuestionBank[num].choice3)) {
+            return getPoints3FromBank(bnk,num);
+        } else {
+            return 100;
+        }
+    }
+
+    //fills the sets array with all the records to be easily passed through method, acting as a question bank
+    public static void fillArray(QuestionSet [] array, QuestionSet biscuits, QuestionSet cars, QuestionSet phones)
+    {
+        array[0] = biscuits;
+        array[1] = cars;
+        array[2] = phones;
+    }
+
+    //generates a random number, either 0, 1 or 2
+    public static int randNum()
+    {
+        Random rand = new Random();
+        return rand.nextInt(3);
+    }
+
+    /*checks which question has been selected from the question bank first then proceeds to ask the rest of the questions
+    it also displays the amount of points scored for the given answer*/
+    public static void checkSet(int randomNumber, QuestionTopics bnk, int [] points, boolean execute, int players)
+    {
+        if (randomNumber == 0)
+        {
+            QuestionSet q = selectedQuestionInBank(bnk, randomNumber);
+            System.out.println("This question is about biscuits");
+            setBiscuits(q);
+            for (int i=1; i<=players; i++) {
+                int score = markingAnswer(inputString(q.question), bnk, randomNumber);
+                System.out.println("Player " + i + "'s score is " + score);
+                System.out.println();
+                points[i-1] = points[i-1] + score;
+            }
+            if (execute)
+            {
+                execute = false;
+                checkSet(1, bnk, points, execute, players);
+                checkSet(2, bnk, points, execute, players);
+            }
+        }
+        else if (randomNumber == 1)
+        {
+            QuestionSet q = selectedQuestionInBank(bnk, randomNumber);
+            System.out.println("This question is about cars");
+            setCars(q);
+            for (int i=1; i<=players; i++) {
+                int score = markingAnswer(inputString(q.question), bnk, randomNumber);
+                System.out.println("Player " + i + "'s score is " + score);
+                System.out.println();
+                points[i-1] = points[i-1] + score;
+            }
+            if (execute) {
+                execute = false;
+                checkSet(0, bnk, points, execute, players);
+                checkSet(2, bnk, points, execute, players);
+            }
+        }
+        else
+        {
+            QuestionSet q = selectedQuestionInBank(bnk, randomNumber);
+            System.out.println("This question is about phones");
+            setPhones(q);
+            for (int i=1; i<=players; i++) {
+                int score = markingAnswer(inputString(q.question), bnk, randomNumber);
+                System.out.println("Player " + i + "'s score is " + score);
+                System.out.println();
+                points[i-1] = points[i-1] + score;
+            }
+            if (execute) {
+                execute = false;
+                checkSet(0, bnk, points, execute, players);
+                checkSet(1, bnk, points, execute, players);
+            }
+        }
+    }
+
+    //sets the values that relate to the biscuit question bank
+    public static void setBiscuits(QuestionSet bisc)
+    {
+        bisc.question = "Name a British biscuit";
+
+        bisc.choice1 = "Digestives";
+        bisc.choice2 = "Jammie Dodgers";
+        bisc.choice3 = "Bourbons";
+
+        bisc.points1 = 94;
+        bisc.points2 = 75;
+        bisc.points3 = 39;
+    }
+
+    //sets the values that relate to the car question bank
+    public static void setCars(QuestionSet cars)
+    {
+        cars.question = "Name a British car";
+
+        cars.choice1 = "Aston Martin";
+        cars.choice2 = "Bentley";
+        cars.choice3 = "Jaguar";
+
+        cars.points1 = 87;
+        cars.points2 = 68;
+        cars.points3 = 88;
+    }
+
+    //sets the values that relate to the phone question bank
+    public static void setPhones(QuestionSet phones)
+    {
+        phones.question = "Name a phone brand";
+
+        phones.choice1 = "iPhone";
+        phones.choice2 = "Samsung";
+        phones.choice3 = "OnePlus";
+
+        phones.points1 = 97;
+        phones.points2 = 73;
+        phones.points3 = 34;
+    }
+}

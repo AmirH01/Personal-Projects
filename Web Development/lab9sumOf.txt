@@ -1,0 +1,44 @@
+.text
+
+    addiu $t1, $zero, 1
+    addiu $t2, $t1, 1
+
+    addi $v0, $zero, 4
+    la $a0, INPUT
+    syscall
+
+    addi $v0, $zero, 5
+    syscall
+    addu $t0, $zero, $v0
+
+    beq $t0, 0, zero
+
+
+    initial_loop:
+      ble $t2, $t0, loop
+
+
+    addi $v0, $zero, 1
+    addu $a0, $t1, $zero
+    syscall
+
+
+    addi $v0, $zero, 10     # Sets $v0 to "10" to select exit syscall
+    syscall
+
+
+    loop:
+      addu $t1, $t1, $t2
+      addiu $t2, $t2, 1
+      j initial_loop
+
+    zero:
+      addi $v0, $zero, 1
+      addi $a0, $zero, 0
+      syscall
+      addi $v0, $zero, 10     # Sets $v0 to "10" to select exit syscall
+      syscall
+
+.data
+
+    INPUT: .asciiz "ENTER A NUMBER: "

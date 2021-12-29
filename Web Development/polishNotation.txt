@@ -1,0 +1,212 @@
+// Amir Hadzic
+// 29/10/2020
+// VERSION 1
+
+/*
+A program that recursively parses expressions, input as strings, from the polish recursively defined
+language and calculates and prints out the answer to the calculations.
+*/
+
+import java.util.Scanner; // Needed to make Scanner available
+
+class charStream // Creates record with 1 string and one integer
+{
+    String input;
+    int position;
+}
+
+public class recursion_V3 {
+    public static void main(String[] args) {
+        System.out.println("The answer is " + recursion()); // prints out string along with the returned value of the recursion method
+    }
+
+    //general method to prompt user to enter a string
+    public static String inputString(String message) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(message);
+        String answer = scanner.nextLine();
+
+        return answer;
+    }
+
+    //begins the necessary recursion to calculate the answer
+    public static int recursion()
+    {
+        charStream text = new charStream();
+        text.input = inputString("Please input the expression");
+        text.position = 0;
+
+        //if statements that check if the expression entered is valid
+        if (text.input.length()>1)
+        {
+            if ((int) peakAtCharacter(text) != 38 & ((int) peakAtCharacter(text) == 43 | (int) peakAtCharacter(text) == 45 | (int) peakAtCharacter(text) == 42 | (int) peakAtCharacter(text) == 47) & (!((int) text.input.charAt(text.input.length() - 1) >= 48 && (int) text.input.charAt(text.input.length() - 1) <= 57) | !(((int) text.input.charAt(text.input.length() - 2) >= 48 && (int) text.input.charAt(text.input.length() - 2) <= 57)|(int) text.input.charAt(text.input.length() - 2) == 38))) {
+                System.out.println("what you have entered does not follow polish notation ----- cannot enter an expression without two numbers at the end");
+                System.exit(0);
+            } else if (((int) peakAtCharacter(text) == 38) & ((int) readAndPeakChar(text) == 43 | (int) readAndPeakChar(text) == 45 | (int) readAndPeakChar(text) == 42 | (int) readAndPeakChar(text) == 47) & !(((int) text.input.charAt(text.input.length() - 2) >= 48 && (int) text.input.charAt(text.input.length() - 2) <= 57 | (int) text.input.charAt(text.input.length() - 2) == 38) | ((int) text.input.charAt(text.input.length() - 1) < 48 && (int) text.input.charAt(text.input.length() - 1) > 57))) {
+                System.out.println("what you have entered does not follow polish notation ----- cannot find sum of invalid number");
+                System.exit(0);
+            }
+        }
+
+        resetPosition(text);
+        int total = evaluations(text);
+        if (text.position + 1 < text.input.length())
+        {
+            System.out.println("you have entered an invalid expression");
+            System.exit(0);
+        }
+        return total;
+    }
+
+    //simply evaluates what character is currently being looked at and decides what action to carry out next
+    public static int evaluations(charStream msg)
+    {
+        char character = peakAtCharacter(msg);
+        if (character == '+')
+        {
+            readPastChar(msg);
+            checkValid(msg, character);
+            return callAddition(msg);
+        }
+        else if (character == '-')
+        {
+            readPastChar(msg);
+            checkValid(msg, character);
+            return callSubtraction(msg);
+        }
+        else if (character == '*')
+        {
+            readPastChar(msg);
+            checkValid(msg, character);
+            return callMultiplication(msg);
+        }
+        else if (character == '/')
+        {
+            readPastChar(msg);
+            checkValid(msg, character);
+            return callDivision(msg);
+        }
+        else if ((int) character >=48 && (int) character <=57)
+        {
+            return Character.getNumericValue(character);
+        }
+        else if (character == '&')
+        {
+            return sumOf(msg);
+        }
+        else
+        {
+            System.out.println("invalid expression ----- unexpected input");
+            System.exit(0);
+            return -1;
+        }
+    }
+
+    //if '&' is entered, this isolated method will ensure at the end the sum of the numbers up to the returned value is calculated
+    public static int sumOf(charStream msg)
+    {
+        readPastChar(msg);
+        int sum = evaluations(msg);
+        return calcSumOf(sum);
+    }
+
+    //recursive method that will keep adding the numbers until it reaches 0
+    public static int calcSumOf(int num)
+    {
+        if (num == 0)
+        {
+            return 0;
+        }
+        return num + calcSumOf(num-1);
+    }
+
+    //method where addition is carried out onto the next value
+    public static int callAddition(charStream msg)
+    {
+        readPastChar(msg);
+        return Character.getNumericValue(msg.input.charAt(msg.position - 1)) + evaluations(msg);
+    }
+
+    //method where subtraction is carried out onto the next value
+    public static int callSubtraction(charStream msg)
+    {
+        readPastChar(msg);
+        return Character.getNumericValue(msg.input.charAt(msg.position - 1)) - evaluations(msg);
+    }
+
+    //method where multiplication is carried out onto the next value
+    public static int callMultiplication(charStream msg)
+    {
+        readPastChar(msg);
+        return Character.getNumericValue(msg.input.charAt(msg.position - 1)) * evaluations(msg);
+    }
+
+    //method where division is carried out onto the next value
+    public static int callDivision(charStream msg)
+    {
+        readPastChar(msg);
+        return Character.getNumericValue(msg.input.charAt(msg.position - 1)) / evaluations(msg);
+    }
+
+    //the position of the virtual 'pointer' is shifted to the right by one
+    public static void readPastChar(charStream text) {
+        text.position = text.position + 1;
+    }
+
+    //the next character is obtained from the string and stored into the variable ch
+    public static char peakAtCharacter(charStream msg)
+    {
+        char ch;
+        String test = msg.input;
+
+        if (msg.position >= test.length()) // Don't read off end of string
+            ch = 'x'; // return a dummy answer
+        else
+            ch = test.charAt(msg.position);
+        return ch;
+    }
+
+    //(used for the if statements at the very start in the recursion method)
+    //Reads past the first character and stores the next one in variable x after resetting the counter position again
+    public static char readAndPeakChar(charStream msg)
+    {
+        resetPosition(msg);
+        readPastChar(msg);
+        char x = peakAtCharacter(msg);
+        resetPosition(msg);
+        return x;
+    }
+
+    //ensures that the grammar of the expression is valid
+    public static charStream checkValid(charStream msg, char character)
+    {
+        if ((msg.input.charAt(msg.position)<48 || msg.input.charAt(msg.position)>57) & msg.input.charAt(msg.position)!=38)
+        {
+            System.out.println("invalid expression");
+            System.exit(0);
+            return msg;
+        }
+        else if (msg.input.charAt(msg.position)==38)
+        {
+            if(((msg.input.charAt(msg.position + 1)>=48 && msg.input.charAt(msg.position + 1)<=57)|msg.input.charAt(msg.position + 1) == 43)&(msg.input.charAt(msg.position + 2)>=48 && msg.input.charAt(msg.position + 2)<=57))
+            {
+                System.out.println("invalid input ----- this does not follow polish notation as you cannot have two numbers or an operation after an '&'");
+                System.exit(0);
+            }
+        }
+        else
+        {
+            character = Character.forDigit(evaluations(msg), 10);
+            msg.input = msg.input.substring(0,msg.position)
+                    +character
+                    +msg.input.substring(msg.position + 1);
+        }
+        return msg;
+    }
+
+    //resets the position of the 'pointer' back to the very beginning
+    public static void resetPosition(charStream msg)
+    {
+        msg.position = 0;
+    }
+}

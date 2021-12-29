@@ -1,0 +1,108 @@
+html{
+    background-color:rgb(63, 63, 63);
+    color:white;
+}
+
+header{
+    font-size:200%;
+    margin-bottom:0.5%;
+}
+
+nav a, nav{
+    font-size:120%;
+    margin:2%;
+}
+
+h4{
+    margin-top:2%;
+    margin-bottom:1%;
+}
+
+nav a{
+    margin:4%;
+}
+nav, #about, #experience, #portfolio, #contact{
+    background-color: rgb(119, 118, 118);
+}
+nav{
+    border-radius: 30px;
+    border: 1pt solid black;
+}
+
+#about, #experience, #portfolio, #contact{
+    font-size:150%;
+    margin: 1%;
+    margin-top: 3%;
+    border: 1pt solid black;
+    border-radius: 30px;
+    padding: 2%;
+    margin-right:35%;
+    display:block;
+}
+
+#skills ul{
+    list-style-type: none;
+}
+#skills{
+    position:absolute;
+    left:70%;
+    right:2%;
+    font-size: 150%;
+    border: 2pt solid black;
+    padding:1%;
+    background-color: orange;
+}
+#blog{
+    position:absolute;
+    left:80%;
+    background-color: orange;
+    border:1pt solid black;
+}
+
+#blog fieldset{
+    padding:60px;
+    border:0;
+}
+
+#education{
+    position:absolute;
+    left:70%;
+    right:2%;
+    font-size: 150%;
+    border: 2pt solid black;
+    padding:1%;
+    background-color: orange;
+}
+
+#blog fieldset input{
+    margin:5%;
+}
+#blog label{
+    text-align:center;
+    font-size:150%;
+}
+h3{
+    font-size:140%;
+    color: orange;
+}
+
+#skills h3, #education h3, #blog h3{
+    color:white;
+}
+
+a:link{
+    color: orange;
+}
+
+a:hover{
+    color:red;
+}
+
+a:visited{
+    color: orange;
+}
+
+#about figure{
+    font-size: 80%;
+    float:right;
+}

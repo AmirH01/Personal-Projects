@@ -1,0 +1,128 @@
+/*
+asks a patient for their readings and prints and saves them
+Exam 2021
+Author: Amir Hadzic
+*/
+
+import java.util.Scanner;
+import java.io.*;
+
+public class final2021 {
+    public static void main(String[] a) throws IOException
+    {
+        Patient[] readings = new Patient[31];
+        final int danger = inputInt("what is the dangerous reading that your doctor gave you?");
+
+        System.out.println();
+        System.out.println("-----------------------------------------------");
+        System.out.println();
+
+        int newSize = enterDetails(readings, danger);
+        printAndSave(readings, newSize);
+
+        System.exit(0);
+    }
+
+    //asks the user to enter the beginning details, such as the day
+    //if they enter 0 or reach the end then it will exit the method and print and save the readings
+    public static int enterDetails(Patient[] read, int danger){
+
+        for (int i = 0; i<read.length; i++) {
+            int day = inputInt("enter the day number (from 1 to 31) \n(enter 0 to quit)");
+            System.out.println();
+
+            if (day == 0) {
+                return i;
+            } else {
+                requestReadings(read, danger, day, i);
+            }
+        }
+        return read.length;
+    }
+
+    //requests the readings from the patient, only making use of the peak reading
+    public static void requestReadings(Patient[] read, int danger, int day, int i)
+    {
+        int peak = 0;
+
+        for (int reading = 1; reading<=3; reading++)
+        {
+            int input = inputInt("enter reading " + reading);
+
+            if (peak<input)
+            {
+                peak = input;
+            }
+            if (input<danger)
+            {
+                System.out.println("YOU MUST GO TO HOSPITAL IMMEDIATELY");
+                System.out.println();
+            }
+        }
+        Patient p = createReading(day, peak);
+        read[i] = p;
+    }
+
+    //general method to prompt user to enter an integer
+    public static int inputInt(String message)
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println(message);
+        int answer = scanner.nextInt();
+        scanner.nextLine();
+
+        return answer;
+    }
+
+    /*******************************************************
+     * Abstract data type for Patient
+     * print a record
+     * saves a record into another file
+     * create a record
+     * get reading day
+     * get reading value
+     */
+
+    //crates a record for the day and the reading for that day
+    public static Patient createReading(int day, int peak){
+        Patient p = new Patient();
+        p.day = day;
+        p.reading = peak;
+
+        return p;
+    }
+
+    //prints and saves the readings using one loop
+    public static void printAndSave(Patient[] readings, int newSize) throws IOException
+    {
+
+        System.out.println();
+        System.out.println("--- here is a summary ---");
+        System.out.println();
+
+        PrintWriter outputStream = new PrintWriter(new FileWriter("doctor.text"));
+
+        for (int i = 0; i<newSize; i++){
+            System.out.println("day " + getDay(readings, i) + ", " + getReading(readings, i));
+            outputStream.println("day " + getDay(readings, i) + ", " + getReading(readings, i));
+        }
+        outputStream.close();
+    }
+
+    //accesses ADT to get the the day of the reading
+    public static int getDay(Patient[] readings, int i){
+        return readings[i].day;
+    }
+
+    //accesses ADT to get the reading for the corresponding day
+    public static int getReading(Patient[] readings, int i){
+        return readings[i].reading;
+    }
+}
+
+//class for the patient
+class Patient
+{
+    int day;
+    int reading;
+}
